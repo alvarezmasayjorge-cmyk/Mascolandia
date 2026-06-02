@@ -1,17 +1,40 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('./prisma');
+const env = require('./config/env');
 const { authenticate, requireAdmin } = require('./middlewares/auth');
 
 const app = express();
-app.use(cors());
+
+// CORS restringido
+const allowedOrigins = env.CORS_ORIGIN.split(',').map(o => o.trim());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS no permitido'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
+// Rate limit en login
+const loginLimiter = rateLimit({
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: env.RATE_LIMIT_MAX_ATTEMPTS,
+  message: 'Demasiados intentos de login. Intenta más tarde.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // --- AUTH ROUTES ---
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   const user = await prisma.user.findUnique({ where: { email } });
   
@@ -214,10 +237,10 @@ app.post('/api/cashflow', authenticate, requireAdmin, async (req, res) => {
 });
 
 // --- START SERVER ---
-const PORT = process.env.PORT || 5001;
-const server = app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+const server = app.listen(env.PORT, () => {
+  console.log(`🎯 Servidor Mascolandia corriendo en puerto ${env.PORT}`);
+  console.log(`📦 Ambiente: ${env.NODE_ENV}`);
 });
 server.on('error', (e) => {
-  console.error("Server error:", e);
+  console.error("❌ Server error:", e);
 });
