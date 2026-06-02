@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -11,33 +12,33 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("ASISTENTE") // ADMIN or ASISTENTE
+  role      String   @default("ASISTENTE")
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  consultations Consultation[]
+  consultations      Consultation[]
   inventoryMovements InventoryMovement[]
+  evolutions         Evolution[]
+  appointments       Appointment[]
 }
 
 model Patient {
   id            Int      @id @default(autoincrement())
-  recordNumber  String   @unique // Autogenerado secuencial, e.g. "000001"
-  
-  // Datos propietario
+  recordNumber  String   @unique
+
   ownerName     String
   ownerAddress  String
   ownerPhone    String
-  
-  // Datos animal
+
   name          String
-  species       String   // CANINO, FELINO, OTRO
+  species       String
   breed         String?
   age           String?
   weight        Float?
-  gender        String?  // MACHO, HEMBRA
+  gender        String?
   color         String?
-  
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -45,6 +46,10 @@ model Patient {
   dewormings    Deworming[]
   consultations Consultation[]
   appointments  Appointment[]
+
+  @@index([species])
+  @@index([ownerName])
+  @@index([updatedAt])
 }
 
 model Vaccination {
@@ -64,95 +69,115 @@ model Deworming {
 
 model Consultation {
   id                  Int      @id @default(autoincrement())
-  number              String   @unique // 000001
+  number              String   @unique
   date                DateTime @default(now())
-  
+  status              String   @default("COMPLETADA")
+
   patientId           Int
   patient             Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  
+
   vetId               Int
   vet                 User     @relation(fields: [vetId], references: [id])
-  
+
   reason              String
   prevDiseases        String?
   prevInterventions   String?
-  
-  // Examen clinico
-  generalState        String?  // Bueno, Regular, Malo
-  mucosa              String?  // Rosada, Palida, etc. JSON string or comma separated
-  appetite            String?  // Normal, Disminuido, Anorexico
-  hydration           String?  // Normal, Leve, Moderada, Grave
+
+  generalState        String?
+  mucosa              String?
+  appetite            String?
+  hydration           String?
   temperature         Float?
-  respirationType     String?  // Normal, Disnea
+  respirationType     String?
   respRate            Int?
   heartRate           Int?
   digestiveSystem     String?
   genitourinarySystem String?
   requestedExams      String?
-  
-  // Conclusiones
+
   diagnosis           String?
   prognosis           String?
   treatment           String?
-  
+
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
   evolutions          Evolution[]
   inventoryMovements  InventoryMovement[]
+
+  @@index([patientId])
+  @@index([date])
+  @@index([status])
 }
 
 model Evolution {
   id             Int      @id @default(autoincrement())
   consultationId Int
   consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+
   date           DateTime @default(now())
   text           String
+
+  @@index([consultationId])
 }
 
 model InventoryItem {
   id            Int      @id @default(autoincrement())
   name          String
-  category      String   // antibiotico, antiparasitario, vacuna, etc.
+  category      String
   stock         Float
-  unit          String   // unidad, caja, ml, etc.
+  unit          String
   expiryDate    DateTime?
   costPrice     Float?
   sellingPrice  Float?
   supplier      String?
   notes         String?
-  
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   movements     InventoryMovement[]
+
+  @@index([expiryDate])
+  @@index([stock])
 }
 
 model InventoryMovement {
   id             Int      @id @default(autoincrement())
   itemId         Int
   item           InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  type           String   // ENTRADA, SALIDA, USO
+  type           String
   quantity       Float
   date           DateTime @default(now())
   userId         Int
   user           User     @relation(fields: [userId], references: [id])
-  
+
   consultationId Int?
   consultation   Consultation? @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@index([date])
 }
 
 model Appointment {
   id        Int      @id @default(autoincrement())
   patientId Int?
-  patient   Patient? @relation(fields: [patientId], references: [id])
-  
+  patient   Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  vetId     Int?
+  vet       User?    @relation(fields: [vetId], references: [id])
+
   date      DateTime
   reason    String?
-  vetId     Int?
-  status    String   @default("PENDIENTE") // PENDIENTE, CONFIRMADA, COMPLETADA, CANCELADA
-  
+  status    String   @default("PENDIENTE")
+
   createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([vetId, date])
 }
 
 model CashTransaction {
@@ -160,8 +185,41 @@ model CashTransaction {
   date        DateTime @default(now())
   description String
   amount      Float
-  category    String   // Consulta, Vacunacion, Cirugia, Medicamentos, Compra, Servicios, Salarios
-  type        String   // INGRESO, EGRESO
-  
+  category    String
+  type        String
+
   createdAt   DateTime @default(now())
+
+  @@index([date])
+  @@index([type])
+}
+
+model Counter {
+  name  String @id
+  value Int    @default(0)
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ClinicSettings {
+  id       Int     @id @default(autoincrement())
+  name     String  @default("Mascolandia")
+  address  String  @default("")
+  phone    String  @default("")
+  email    String  @default("")
+  logoUrl  String  @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
