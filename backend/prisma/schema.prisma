@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ASISTENTE") // ADMIN or ASISTENTE
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  consultations Consultation[]
+  inventoryMovements InventoryMovement[]
+}
+
+model Patient {
+  id            Int      @id @default(autoincrement())
+  recordNumber  String   @unique // Autogenerado secuencial, e.g. "000001"
+  
+  // Datos propietario
+  ownerName     String
+  ownerAddress  String
+  ownerPhone    String
+  
+  // Datos animal
+  name          String
+  species       String   // CANINO, FELINO, OTRO
+  breed         String?
+  age           String?
+  weight        Float?
+  gender        String?  // MACHO, HEMBRA
+  color         String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  vaccinations  Vaccination[]
+  dewormings    Deworming[]
+  consultations Consultation[]
+  appointments  Appointment[]
+}
+
+model Vaccination {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type      String   // Parvovirus, Rabia, etc.
+  date      DateTime
+}
+
+model Deworming {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  date      DateTime
+}
+
+model Consultation {
+  id                  Int      @id @default(autoincrement())
+  number              String   @unique // 000001
+  date                DateTime @default(now())
+  
+  patientId           Int
+  patient             Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  vetId               Int
+  vet                 User     @relation(fields: [vetId], references: [id])
+  
+  reason              String
+  prevDiseases        String?
+  prevInterventions   String?
+  
+  // Examen clinico
+  generalState        String?  // Bueno, Regular, Malo
+  mucosa              String?  // Rosada, Palida, etc. JSON string or comma separated
+  appetite            String?  // Normal, Disminuido, Anorexico
+  hydration           String?  // Normal, Leve, Moderada, Grave
+  temperature         Float?
+  respirationType     String?  // Normal, Disnea
+  respRate            Int?
+  heartRate           Int?
+  digestiveSystem     String?
+  genitourinarySystem String?
+  requestedExams      String?
+  
+  // Conclusiones
+  diagnosis           String?
+  prognosis           String?
+  treatment           String?
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  evolutions          Evolution[]
+  inventoryMovements  InventoryMovement[]
+}
+
+model Evolution {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  date           DateTime @default(now())
+  text           String
+}
+
+model InventoryItem {
+  id            Int      @id @default(autoincrement())
+  name          String
+  category      String   // antibiotico, antiparasitario, vacuna, etc.
+  stock         Float
+  unit          String   // unidad, caja, ml, etc.
+  expiryDate    DateTime?
+  costPrice     Float?
+  sellingPrice  Float?
+  supplier      String?
+  notes         String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  movements     InventoryMovement[]
+}
+
+model InventoryMovement {
+  id             Int      @id @default(autoincrement())
+  itemId         Int
+  item           InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  type           String   // ENTRADA, SALIDA, USO
+  quantity       Float
+  date           DateTime @default(now())
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+  
+  consultationId Int?
+  consultation   Consultation? @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  patientId Int?
+  patient   Patient? @relation(fields: [patientId], references: [id])
+  
+  date      DateTime
+  reason    String?
+  vetId     Int?
+  status    String   @default("PENDIENTE") // PENDIENTE, CONFIRMADA, COMPLETADA, CANCELADA
+  
+  createdAt DateTime @default(now())
+}
+
+model CashTransaction {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @default(now())
+  description String
+  amount      Float
+  category    String   // Consulta, Vacunacion, Cirugia, Medicamentos, Compra, Servicios, Salarios
+  type        String   // INGRESO, EGRESO
+  
+  createdAt   DateTime @default(now())
+}
