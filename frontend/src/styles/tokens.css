@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* Variables CSS para la paleta Mascolandia */
+@theme {
+  /* Colores Brand — Paleta Mascolandia */
+  --color-brand-50:   #F5F0FB;
+  --color-brand-100:  #E9DDF7;
+  --color-brand-200:  #D7C2EF;
+  --color-brand-300:  #B89AE5;
+  --color-brand-400:  #9F7FD9;
+  --color-brand-500:  #7C3AED;
+  --color-brand-600:  #5B21B6;   /* dominante */
+  --color-brand-700:  #4C1D95;
+  --color-brand-800:  #3F0E7D;
+  --color-brand-900:  #2E1065;
+
+  /* Superficie */
+  --color-surface:          #FAFAFA;   /* fondo app */
+  --color-surface-raised:   #FFFFFF;   /* cards */
+  --color-surface-sunken:   #F3F0F7;   /* zonas internas */
+
+  /* Tinta — textos */
+  --color-ink-900: #1F1B2E;    /* títulos, texto oscuro */
+  --color-ink-700: #3D3754;    /* cuerpo principal */
+  --color-ink-500: #6B6585;    /* secundario */
+  --color-ink-300: #A8A2BD;    /* placeholders, hints */
+
+  /* Semántica */
+  --color-warn-50:     #FEF3C7;
+  --color-warn-100:    #FDE68A;
+  --color-warn-500:    #F59E0B;   /* ámbar — vencimientos próximos */
+
+  --color-danger-50:    #FEE2E2;
+  --color-danger-100:   #FECACA;
+  --color-danger-500:   #DC2626;   /* stock 0, vencidos, errores críticos */
+
+  --color-success-50:   #ECF3EE;
+  --color-success-100:  #D1E7DB;
+  --color-success-500:  #84A98C;   /* salvia — confirmaciones */
+
+  --color-info-50:      #EFF6FF;
+  --color-info-500:     #3B82F6;
+
+  /* Tipografía */
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-sans:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Tamaños de texto */
+  --text-xs:       0.75rem;   /* 12px */
+  --text-sm:       0.875rem;  /* 14px */
+  --text-base:     1rem;      /* 16px */
+  --text-lg:       1.125rem;  /* 18px */
+  --text-xl:       1.375rem;  /* 22px */
+  --text-2xl:      1.75rem;   /* 28px */
+  --text-3xl:      2.25rem;   /* 36px */
+  --text-display:  3rem;      /* 48px */
+
+  /* Espaciado (escala 4px) */
+  --space-0-5:  0.125rem;
+  --space-1:    0.25rem;
+  --space-2:    0.5rem;
+  --space-3:    0.75rem;
+  --space-4:    1rem;
+  --space-5:    1.25rem;
+  --space-6:    1.5rem;
+  --space-8:    2rem;
+  --space-10:   2.5rem;
+  --space-12:   3rem;
+  --space-16:   4rem;
+
+  /* Radios */
+  --radius-none: 0;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* Sombras */
+  --shadow-none: 0 0 rgba(0, 0, 0, 0);
+  --shadow-sm:   0 1px 2px rgba(31, 27, 46, 0.04);
+  --shadow-md:   0 4px 12px rgba(31, 27, 46, 0.06);
+  --shadow-lg:   0 12px 32px rgba(91, 33, 182, 0.10);
+  --shadow-xl:   0 20px 48px rgba(91, 33, 182, 0.12);
+
+  /* Bordes */
+  --border-light: 1px solid rgba(31, 27, 46, 0.08);
+  --border-base:  1px solid rgba(31, 27, 46, 0.12);
+  --border-dark:  1px solid rgba(31, 27, 46, 0.20);
+}
+
+/* Estilos globales */
+* {
+  @apply border-brand-200;
+}
+
+html {
+  @apply bg-surface text-ink-700 font-sans;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  @apply bg-surface text-ink-700;
+  margin: 0;
+  padding: 0;
+}
+
+/* Tipografía */
+h1 {
+  @apply font-display text-display text-ink-900 font-bold;
+}
+
+h2 {
+  @apply font-display text-3xl text-ink-900 font-bold;
+}
+
+h3 {
+  @apply font-display text-2xl text-ink-900 font-bold;
+}
+
+h4 {
+  @apply font-display text-xl text-ink-900 font-bold;
+}
+
+h5, h6 {
+  @apply font-display text-lg text-ink-900 font-bold;
+}
+
+p {
+  @apply text-base text-ink-700 leading-relaxed;
+}
+
+a {
+  @apply text-brand-600 hover:text-brand-700 transition-colors;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(91, 33, 182, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(91, 33, 182, 0.5);
+}
+
+/* Print */
+@media print {
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+
+  body {
+    @apply bg-white;
+  }
+
+  .print\:hidden {
+    @apply hidden;
+  }
+
+  .print\:block {
+    @apply block;
+  }
+}
