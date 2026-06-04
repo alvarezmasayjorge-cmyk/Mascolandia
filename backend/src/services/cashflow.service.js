@@ -31,4 +31,12 @@ async function getSummary({ startDate, endDate }) {
   return { income, expense, balance: income - expense };
 }
 
-module.exports = { list, create, getSummary };
+async function update(id, data) {
+  return prisma.cashTransaction.update({ where: { id: Number(id) }, data });
+}
+
+async function remove(id) {
+  return prisma.cashTransaction.delete({ where: { id: Number(id) } });
+}
+
+module.exports = { list, create, update, remove, getSummary };

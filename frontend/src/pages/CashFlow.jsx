@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ArrowDown, ArrowUp, Plus, X, DollarSign } from 'lucide-react';
+import { Search, ArrowDown, ArrowUp, Plus, X, DollarSign, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import api from '../api/axios';
+
+const EMPTY_FORM = { type: 'INGRESO', category: 'Consulta', description: '', amount: '' };
 
 export default function CashFlow() {
   const [transactions, setTransactions] = useState([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ type: 'INGRESO', category: 'Consulta', description: '', amount: '' });
+  const [editTx, setEditTx] = useState(null);
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
-  useEffect(() => {
-    api.get('/cashflow').then(res => setTransactions(res.data.data || [])).catch(console.error);
-  }, []);
+  const fetchTransactions = async () => {
+    try {
+      const res = await api.get('/cashflow');
+      setTransactions(res.data.data || []);
+    } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => { fetchTransactions(); }, []);
 
   const income = transactions.filter(t => t.type === 'INGRESO').reduce((a, b) => a + b.amount, 0);
   const expense = transactions.filter(t => t.type === 'EGRESO').reduce((a, b) => a + b.amount, 0);
@@ -23,17 +31,54 @@ export default function CashFlow() {
     t.category.toLowerCase().includes(search.toLowerCase())
   );
 
+  const openNew = () => {
+    setEditTx(null);
+    setFormData(EMPTY_FORM);
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (tx) => {
+    setEditTx(tx);
+    setFormData({
+      type: tx.type,
+      category: tx.category,
+      description: tx.description,
+      amount: String(tx.amount),
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditTx(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = { ...formData, amount: parseFloat(formData.amount) };
     try {
-      await api.post('/cashflow', { ...formData, amount: parseFloat(formData.amount) });
-      setIsModalOpen(false);
-      setFormData({ type: 'INGRESO', category: 'Consulta', description: '', amount: '' });
-      toast.success('Transaccion registrada');
-      const res = await api.get('/cashflow');
-      setTransactions(res.data.data || []);
+      if (editTx) {
+        await api.put(`/cashflow/${editTx.id}`, payload);
+        toast.success('Transacción actualizada');
+      } else {
+        await api.post('/cashflow', payload);
+        toast.success('Transacción registrada');
+      }
+      closeModal();
+      fetchTransactions();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al registrar');
+      toast.error(err.response?.data?.message || 'Error al guardar');
+    }
+  };
+
+  const handleDelete = async (tx) => {
+    if (!window.confirm(`¿Eliminar la transacción "${tx.description}" por Bs. ${tx.amount.toLocaleString()}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await api.delete(`/cashflow/${tx.id}`);
+      toast.success('Transacción eliminada');
+      fetchTransactions();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error al eliminar');
     }
   };
 
@@ -41,7 +86,7 @@ export default function CashFlow() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <h1 className="text-2xl font-display font-bold text-ink-900">Flujo de caja</h1>
-        <button onClick={() => setIsModalOpen(true)} className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium w-full sm:w-auto">
+        <button onClick={openNew} className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium w-full sm:w-auto">
           <Plus size={20} /> <span>Nueva transaccion</span>
         </button>
       </div>
@@ -76,6 +121,7 @@ export default function CashFlow() {
               <th className="p-3 md:p-4 font-medium">Descripcion</th>
               <th className="p-3 md:p-4 font-medium">Categoria</th>
               <th className="p-3 md:p-4 font-medium text-right">Monto</th>
+              <th className="p-3 md:p-4 font-medium text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -94,10 +140,20 @@ export default function CashFlow() {
                 <td className={`p-3 md:p-4 text-right font-bold ${tx.type === 'INGRESO' ? 'text-green-600' : 'text-danger-500'}`}>
                   {tx.type === 'INGRESO' ? '+' : '-'}Bs. {tx.amount.toLocaleString()}
                 </td>
+                <td className="p-3 md:p-4">
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={() => openEdit(tx)} className="text-ink-400 hover:text-brand-600 transition-colors" title="Editar transacción">
+                      <Pencil size={16} />
+                    </button>
+                    <button onClick={() => handleDelete(tx)} className="text-ink-400 hover:text-danger-500 transition-colors" title="Eliminar transacción">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
             {filteredTxs.length === 0 && (
-              <tr><td colSpan="5" className="p-12 text-center">
+              <tr><td colSpan="6" className="p-12 text-center">
                 <DollarSign size={40} className="text-brand-300 mx-auto mb-3" />
                 <p className="text-ink-500 font-medium">No hay transacciones registradas</p>
               </td></tr>
@@ -107,13 +163,13 @@ export default function CashFlow() {
         </div>
       </div>
 
-      {/* Modal nueva transaccion */}
+      {/* Modal nueva / editar transaccion */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white rounded-t-2xl">
-              <h2 className="text-xl font-display font-bold text-ink-900">Nueva transaccion</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-ink-500 hover:bg-surface-sunken p-2 rounded-lg"><X size={20} /></button>
+              <h2 className="text-xl font-display font-bold text-ink-900">{editTx ? 'Editar transacción' : 'Nueva transaccion'}</h2>
+              <button onClick={closeModal} className="text-ink-500 hover:bg-surface-sunken p-2 rounded-lg"><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
@@ -145,8 +201,8 @@ export default function CashFlow() {
                 <input required type="number" step="0.01" min="0.01" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900 text-xl font-bold" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} />
               </div>
               <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 text-ink-500 hover:bg-surface-sunken rounded-lg font-medium">Cancelar</button>
-                <button type="submit" className="px-5 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium">Registrar</button>
+                <button type="button" onClick={closeModal} className="px-4 py-2.5 text-ink-500 hover:bg-surface-sunken rounded-lg font-medium">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium">{editTx ? 'Guardar cambios' : 'Registrar'}</button>
               </div>
             </form>
           </div>

@@ -9,4 +9,6 @@ const createTransactionSchema = z.object({
   }),
 });
 
-module.exports = { createTransactionSchema };
+const updateTransactionSchema = createTransactionSchema.partial();
+
+module.exports = { createTransactionSchema, updateTransactionSchema };
