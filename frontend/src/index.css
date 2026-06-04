@@ -1,11 +1,171 @@
-@import "./styles/tokens.css";
+@import "tailwindcss";
 
 @theme {
-  --color-primary: #5B21B6;
-  --color-primary-light: #7C3AED;
-  --color-primary-dark: #4C1D95;
+  /* Color — paleta Mascolandia */
+  --color-brand-50:  #F5F0FB;
+  --color-brand-100: #E9DDF7;
+  --color-brand-200: #D7C2EF;
+  --color-brand-300: #B89AE5;
+  --color-brand-500: #7C3AED;
+  --color-brand-600: #5B21B6;
+  --color-brand-700: #4C1D95;
+  --color-brand-900: #2E1065;
 
-  --color-warn: #F59E0B;
-  --color-danger: #DC2626;
-  --color-success: #84A98C;
+  --color-surface:        #FAFAFA;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-sunken: #F3F0F7;
+
+  --color-ink-900: #1F1B2E;
+  --color-ink-700: #3D3754;
+  --color-ink-500: #6B6585;
+  --color-ink-300: #A8A2BD;
+
+  --color-warn-500: #F59E0B;
+  --color-warn-50:  #FEF3C7;
+  --color-danger-500: #DC2626;
+  --color-danger-50:  #FEE2E2;
+  --color-success-500: #84A98C;
+  --color-success-50:  #ECF3EE;
+
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-sans:    'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+body {
+  background-color: #FAFAFA;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: #3D3754;
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(91, 33, 182, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(91, 33, 182, 0.5); }
+
+/* ── FullCalendar UX ── */
+
+/* Eventos: cursor pointer + hover elevación */
+.fc-event {
+  cursor: pointer !important;
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease !important;
+  border: none !important;
+}
+.fc-event:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.25);
+  filter: brightness(1.08);
+  z-index: 5 !important;
+}
+.fc-event:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Celdas del calendario: hover sutil para indicar que se puede hacer click */
+.fc .fc-timegrid-slot:hover,
+.fc .fc-daygrid-day:hover {
+  background-color: #F5F0FB !important;
+}
+.fc .fc-timegrid-slot {
+  cursor: pointer;
+}
+.fc .fc-daygrid-day {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+/* Hoy resaltado */
+.fc .fc-day-today {
+  background-color: #F5F0FB !important;
+}
+
+/* Header del calendario */
+.fc .fc-toolbar-title {
+  font-family: 'Fraunces', Georgia, serif !important;
+  font-weight: 700 !important;
+  color: #1F1B2E !important;
+  font-size: 1.25rem !important;
+}
+
+/* Botones del calendario */
+.fc .fc-button {
+  background-color: #F3F0F7 !important;
+  border: 1px solid #D7C2EF !important;
+  color: #3D3754 !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+  text-transform: capitalize !important;
+  box-shadow: none !important;
+}
+.fc .fc-button:hover {
+  background-color: #E9DDF7 !important;
+  border-color: #B89AE5 !important;
+  color: #4C1D95 !important;
+}
+.fc .fc-button-active,
+.fc .fc-button.fc-button-active {
+  background-color: #5B21B6 !important;
+  border-color: #5B21B6 !important;
+  color: white !important;
+}
+.fc .fc-button-active:hover {
+  background-color: #4C1D95 !important;
+}
+
+/* Prev/Next botones */
+.fc .fc-prev-button,
+.fc .fc-next-button {
+  padding: 6px 8px !important;
+}
+
+/* Bordes de la grilla */
+.fc .fc-timegrid-slot {
+  height: 42px !important;
+}
+.fc th {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  color: #6B6585 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  padding: 10px 0 !important;
+}
+.fc td, .fc th {
+  border-color: #F0ECF5 !important;
+}
+.fc .fc-scrollgrid {
+  border-color: #F0ECF5 !important;
+}
+
+/* Hora lateral */
+.fc .fc-timegrid-slot-label-cushion {
+  font-size: 11px !important;
+  color: #A8A2BD !important;
+  font-weight: 500 !important;
+}
+
+/* Línea de hora actual */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #DC2626 !important;
+  border-width: 2px !important;
+}
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: #DC2626 !important;
+}
+
+/* Print */
+@media print {
+  @page { margin: 5mm 8mm; size: letter; }
+  body { background: white; }
 }
