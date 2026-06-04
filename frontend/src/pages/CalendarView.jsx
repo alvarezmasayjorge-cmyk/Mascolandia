@@ -10,13 +10,13 @@ import { toast } from 'sonner';
 import api from '../api/axios';
 
 const STATUSES = [
-  { value: 'PENDIENTE',   label: 'Pendiente',    bg: '#B89AE5', text: '#2E1065', dot: '#9F7FD9' },
-  { value: 'CONFIRMADA',  label: 'Confirmada',   bg: '#5B21B6', text: '#FFFFFF', dot: '#5B21B6' },
-  { value: 'ASISTIO',     label: 'Asistió',      bg: '#84A98C', text: '#1A2E1D', dot: '#84A98C' },
-  { value: 'COMPLETADA',  label: 'Completada',   bg: '#3D8B5F', text: '#FFFFFF', dot: '#3D8B5F' },
-  { value: 'NO_ASISTIO',  label: 'No asistió',   bg: '#FECACA', text: '#991B1B', dot: '#DC2626' },
-  { value: 'REAGENDADA',  label: 'Reagendada',   bg: '#FDE68A', text: '#78350F', dot: '#F59E0B' },
-  { value: 'CANCELADA',   label: 'Cancelada',    bg: '#E5E1EB', text: '#6B6585', dot: '#A8A2BD' },
+  { value: 'PENDIENTE',   label: 'Pendiente',    bg: '#B89AE5', text: '#2E1065', dot: '#9F7FD9',  hint: 'Cita agendada, aún sin confirmar' },
+  { value: 'CONFIRMADA',  label: 'Confirmada',   bg: '#5B21B6', text: '#FFFFFF', dot: '#5B21B6',  hint: 'El dueño confirmó que asistirá' },
+  { value: 'ASISTIO',     label: 'Asistió',      bg: '#84A98C', text: '#1A2E1D', dot: '#84A98C',  hint: 'El paciente llegó a la clínica pero la consulta aún no fue registrada en el sistema' },
+  { value: 'COMPLETADA',  label: 'Completada',   bg: '#3D8B5F', text: '#FFFFFF', dot: '#3D8B5F',  hint: 'La consulta fue atendida y registrada completamente en el sistema' },
+  { value: 'NO_ASISTIO',  label: 'No asistió',   bg: '#FECACA', text: '#991B1B', dot: '#DC2626',  hint: 'El paciente no se presentó a la cita' },
+  { value: 'REAGENDADA',  label: 'Reagendada',   bg: '#FDE68A', text: '#78350F', dot: '#F59E0B',  hint: 'La cita fue movida a otra fecha' },
+  { value: 'CANCELADA',   label: 'Cancelada',    bg: '#E5E1EB', text: '#6B6585', dot: '#A8A2BD',  hint: 'La cita fue cancelada' },
 ];
 
 function getStatus(value) {
@@ -131,11 +131,12 @@ export default function CalendarView() {
       {/* Leyenda de estados */}
       <div className="flex flex-wrap gap-3">
         {STATUSES.map(s => (
-          <div key={s.value} className="flex items-center gap-1.5 text-xs text-ink-500">
+          <div key={s.value} className="flex items-center gap-1.5 text-xs text-ink-500 cursor-help" title={s.hint}>
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.dot }} />
             {s.label}
           </div>
         ))}
+        <span className="text-xs text-ink-300 italic">— pasa el cursor sobre un estado para ver su descripción</span>
       </div>
 
       <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-gray-100 overflow-x-auto">

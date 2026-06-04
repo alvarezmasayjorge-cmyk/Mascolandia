@@ -49,15 +49,15 @@ export default function CashFlow() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 text-center">
           <p className="text-sm font-medium text-ink-500 mb-1">Total ingresos</p>
-          <p className="text-3xl font-bold text-green-600">${income.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-green-600">Bs. {income.toLocaleString()}</p>
         </div>
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 text-center">
           <p className="text-sm font-medium text-ink-500 mb-1">Total egresos</p>
-          <p className="text-3xl font-bold text-danger-500">${expense.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-danger-500">Bs. {expense.toLocaleString()}</p>
         </div>
         <div className={`p-5 rounded-xl shadow-sm text-center border ${balance >= 0 ? 'bg-brand-50 border-brand-300 text-brand-700' : 'bg-danger-50 border-red-200 text-red-700'}`}>
           <p className="text-sm font-medium mb-1">Balance</p>
-          <p className="text-3xl font-bold">${balance.toLocaleString()}</p>
+          <p className="text-3xl font-bold">Bs. {balance.toLocaleString()}</p>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export default function CashFlow() {
                 <td className="p-3 md:p-4 text-ink-900 font-medium">{tx.description}</td>
                 <td className="p-3 md:p-4 text-ink-500">{tx.category}</td>
                 <td className={`p-3 md:p-4 text-right font-bold ${tx.type === 'INGRESO' ? 'text-green-600' : 'text-danger-500'}`}>
-                  {tx.type === 'INGRESO' ? '+' : '-'}${tx.amount.toLocaleString()}
+                  {tx.type === 'INGRESO' ? '+' : '-'}Bs. {tx.amount.toLocaleString()}
                 </td>
               </tr>
             ))}
@@ -141,7 +141,7 @@ export default function CashFlow() {
                 <input required type="text" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm text-ink-700 mb-1 font-medium">Monto ($)</label>
+                <label className="block text-sm text-ink-700 mb-1 font-medium">Monto (Bs.)</label>
                 <input required type="number" step="0.01" min="0.01" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900 text-xl font-bold" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} />
               </div>
               <div className="pt-4 flex justify-end gap-3">

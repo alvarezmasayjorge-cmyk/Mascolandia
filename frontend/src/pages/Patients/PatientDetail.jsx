@@ -142,12 +142,12 @@ export default function PatientDetail() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-surface-sunken p-1 rounded-lg print:hidden">
+      <div className="flex gap-1 bg-surface-sunken p-1 rounded-lg print:hidden overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-shrink-0 py-2.5 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === tab.key ? 'bg-white text-brand-600 shadow-sm' : 'text-ink-500 hover:text-ink-700'
             }`}
           >
@@ -276,7 +276,7 @@ export default function PatientDetail() {
             </button>
           </div>
           {showVaccForm && (
-            <form onSubmit={handleAddVaccination} className="flex gap-3 mb-4 p-3 bg-surface-sunken rounded-lg">
+            <form onSubmit={handleAddVaccination} className="flex flex-col sm:flex-row gap-3 mb-4 p-3 bg-surface-sunken rounded-lg">
               <input required type="text" placeholder="Tipo (ej: Parvovirus, Rabia)" className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500" value={vaccForm.type} onChange={e => setVaccForm({...vaccForm, type: e.target.value})} />
               <input required type="date" className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500" value={vaccForm.date} onChange={e => setVaccForm({...vaccForm, date: e.target.value})} />
               <button type="submit" className="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700">Guardar</button>
@@ -307,7 +307,7 @@ export default function PatientDetail() {
             </button>
           </div>
           {showDewormForm && (
-            <form onSubmit={handleAddDeworming} className="flex gap-3 mb-4 p-3 bg-surface-sunken rounded-lg">
+            <form onSubmit={handleAddDeworming} className="flex flex-col sm:flex-row gap-3 mb-4 p-3 bg-surface-sunken rounded-lg">
               <input required type="date" className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500" value={dewormDate} onChange={e => setDewormDate(e.target.value)} />
               <button type="submit" className="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700">Guardar</button>
             </form>

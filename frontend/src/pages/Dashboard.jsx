@@ -89,7 +89,7 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-sm text-ink-500 font-medium">Ingresos del mes</p>
-              <p className="text-2xl font-bold text-ink-900">${data.cashFlow.income.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-ink-900">Bs. {data.cashFlow.income.toLocaleString()}</p>
             </div>
           </div>
         )}
