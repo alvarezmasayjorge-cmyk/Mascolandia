@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import { X, Calendar, Clock, User, PawPrint, Phone, MapPin, FileText, ChevronDown } from 'lucide-react';
+import { X, Calendar, Clock, User, PawPrint, Phone, MapPin, FileText, ChevronDown, HelpCircle, List, CalendarDays, CalendarRange, LayoutGrid } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -19,8 +20,25 @@ const STATUSES = [
   { value: 'CANCELADA',   label: 'Cancelada',    bg: '#E5E1EB', text: '#6B6585', dot: '#A8A2BD',  hint: 'La cita fue cancelada' },
 ];
 
+const MOBILE_VIEWS = [
+  { value: 'listWeek',      label: 'Lista',   icon: List },
+  { value: 'timeGridDay',   label: 'Día',     icon: CalendarDays },
+  { value: 'timeGridWeek',  label: 'Semana',  icon: CalendarRange },
+  { value: 'dayGridMonth',  label: 'Mes',     icon: LayoutGrid },
+];
+
 function getStatus(value) {
   return STATUSES.find(s => s.value === value) || STATUSES[0];
+}
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return isMobile;
 }
 
 export default function CalendarView() {
@@ -28,12 +46,29 @@ export default function CalendarView() {
   const [patients, setPatients] = useState([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [formData, setFormData] = useState({ patientId: '', date: '', time: '', reason: '' });
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('listWeek');
   const calendarRef = useRef(null);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setCurrentView(isMobile ? 'listWeek' : 'timeGridWeek');
+  }, [isMobile]);
+
+  const changeView = (view) => {
+    setCurrentView(view);
+    const cal = calendarRef.current?.getApi();
+    if (cal) cal.changeView(view);
+  };
+
+  const goToday = () => {
+    const cal = calendarRef.current?.getApi();
+    if (cal) cal.today();
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -129,29 +164,68 @@ export default function CalendarView() {
       </div>
 
       {/* Leyenda de estados */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {STATUSES.map(s => (
-          <div key={s.value} className="flex items-center gap-1.5 text-xs text-ink-500 cursor-help" title={s.hint}>
+          <div key={s.value} className="flex items-center gap-1.5 text-xs text-ink-500">
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.dot }} />
             {s.label}
           </div>
         ))}
-        <span className="text-xs text-ink-300 italic">— pasa el cursor sobre un estado para ver su descripción</span>
+        <button
+          onClick={() => setIsHelpOpen(true)}
+          className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 font-medium"
+          aria-label="Ver descripción de los estados"
+        >
+          <HelpCircle size={14} /> ¿Qué significa cada estado?
+        </button>
       </div>
 
-      <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+      {/* Selector de vista — visible solo en móvil */}
+      <div className="md:hidden space-y-2">
+        <div className="grid grid-cols-4 gap-1 bg-surface-sunken p-1 rounded-lg">
+          {MOBILE_VIEWS.map(v => {
+            const Icon = v.icon;
+            const active = currentView === v.value;
+            return (
+              <button
+                key={v.value}
+                onClick={() => changeView(v.value)}
+                className={`flex flex-col items-center gap-1 py-2 rounded-md text-xs font-medium transition-colors ${
+                  active ? 'bg-white text-brand-600 shadow-sm' : 'text-ink-500 hover:text-ink-700'
+                }`}
+              >
+                <Icon size={16} />
+                {v.label}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          onClick={goToday}
+          className="w-full py-2 rounded-lg border border-gray-200 text-sm text-ink-700 font-medium hover:bg-surface-sunken"
+        >
+          Ir a hoy
+        </button>
+      </div>
+
+      <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-gray-100">
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView={isMobile ? 'timeGridDay' : 'timeGridWeek'}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          initialView={isMobile ? 'listWeek' : 'timeGridWeek'}
           headerToolbar={isMobile ? {
-            left: 'prev,next',
+            left: 'prev',
             center: 'title',
-            right: 'today'
+            right: 'next'
           } : {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          }}
+          datesSet={(arg) => {
+            if (arg.view?.type && arg.view.type !== currentView) {
+              setCurrentView(arg.view.type);
+            }
           }}
           events={appointments}
           dateClick={handleDateClick}
@@ -162,17 +236,41 @@ export default function CalendarView() {
             info.el.title = `${appt.patient?.name || 'Cita'} — ${appt.reason || ''}\n${st.label} · ${fmtTime(appt.date)} hrs`;
             info.el.style.borderLeft = `3px solid ${st.dot}`;
           }}
-          height={isMobile ? '60vh' : '75vh'}
+          height={isMobile ? '65vh' : '75vh'}
           slotMinTime="08:00:00"
           slotMaxTime="20:00:00"
           allDaySlot={false}
           nowIndicator={true}
           locale="es"
-          buttonText={{ today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Dia' }}
+          buttonText={{ today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' }}
+          noEventsText="No hay citas en este rango"
           eventDisplay="block"
           eventBorderColor="transparent"
         />
       </div>
+
+      {/* ══════ Modal: Ayuda de estados ══════ */}
+      {isHelpOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setIsHelpOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white rounded-t-2xl">
+              <h2 className="text-lg font-display font-bold text-ink-900">Estados de las citas</h2>
+              <button onClick={() => setIsHelpOpen(false)} className="text-ink-500 hover:bg-surface-sunken p-2 rounded-lg"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              {STATUSES.map(s => (
+                <div key={s.value} className="flex gap-3">
+                  <span className="w-3 h-3 rounded-full flex-shrink-0 mt-1.5" style={{ backgroundColor: s.dot }} />
+                  <div>
+                    <p className="font-semibold text-sm text-ink-900">{s.label}</p>
+                    <p className="text-sm text-ink-500 mt-0.5">{s.hint}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════ Modal: Crear cita ══════ */}
       {isCreateOpen && (
@@ -200,7 +298,7 @@ export default function CalendarView() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-ink-700 mb-1 font-medium">Fecha</label>
                   <input required type="date" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
@@ -234,12 +332,12 @@ export default function CalendarView() {
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
 
               {/* Header con color del estado */}
-              <div className="rounded-t-2xl px-6 py-5 flex justify-between items-start" style={{ backgroundColor: st.bg + '22' }}>
-                <div>
-                  <h2 className="text-xl font-display font-bold text-ink-900">{pat?.name || 'Cita'}</h2>
-                  <p className="text-sm text-ink-500 mt-0.5">{appt.reason}</p>
+              <div className="rounded-t-2xl px-6 py-5 flex justify-between items-start gap-3" style={{ backgroundColor: st.bg + '22' }}>
+                <div className="min-w-0">
+                  <h2 className="text-xl font-display font-bold text-ink-900 truncate">{pat?.name || 'Cita'}</h2>
+                  <p className="text-sm text-ink-500 mt-0.5 break-words">{appt.reason}</p>
                 </div>
-                <button onClick={() => setIsDetailOpen(false)} className="text-ink-500 hover:bg-white/60 p-2 rounded-lg"><X size={20} /></button>
+                <button onClick={() => setIsDetailOpen(false)} className="text-ink-500 hover:bg-white/60 p-2 rounded-lg flex-shrink-0"><X size={20} /></button>
               </div>
 
               <div className="p-6 space-y-5">
@@ -276,7 +374,7 @@ export default function CalendarView() {
 
                 {/* Fecha y hora */}
                 <div className="flex items-center gap-3 text-sm">
-                  <div className="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600">
+                  <div className="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 flex-shrink-0">
                     <Clock size={18} />
                   </div>
                   <div>
@@ -289,16 +387,16 @@ export default function CalendarView() {
                 {pat && (
                   <div className="bg-surface-sunken rounded-xl p-4 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600">
+                      <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 flex-shrink-0">
                         <PawPrint size={18} />
                       </div>
-                      <div>
-                        <p className="font-bold text-ink-900">{pat.name}</p>
-                        <p className="text-xs text-ink-500">{pat.species}{pat.breed ? ` — ${pat.breed}` : ''}</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-ink-900 truncate">{pat.name}</p>
+                        <p className="text-xs text-ink-500 truncate">{pat.species}{pat.breed ? ` — ${pat.breed}` : ''}</p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                       {pat.age && (
                         <p className="text-ink-500">Edad: <span className="font-medium text-ink-700">{pat.age}</span></p>
                       )}
@@ -315,19 +413,19 @@ export default function CalendarView() {
 
                     <div className="border-t border-gray-200 pt-3 space-y-1.5">
                       <div className="flex items-center gap-2 text-sm">
-                        <User size={14} className="text-ink-400" />
-                        <span className="text-ink-700 font-medium">{pat.ownerName}</span>
+                        <User size={14} className="text-ink-400 flex-shrink-0" />
+                        <span className="text-ink-700 font-medium break-words">{pat.ownerName}</span>
                       </div>
                       {pat.ownerPhone && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Phone size={14} className="text-ink-400" />
-                          <span className="text-ink-500">{pat.ownerPhone}</span>
+                          <Phone size={14} className="text-ink-400 flex-shrink-0" />
+                          <span className="text-ink-500 break-words">{pat.ownerPhone}</span>
                         </div>
                       )}
                       {pat.ownerAddress && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin size={14} className="text-ink-400" />
-                          <span className="text-ink-500">{pat.ownerAddress}</span>
+                        <div className="flex items-start gap-2 text-sm">
+                          <MapPin size={14} className="text-ink-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-ink-500 break-words">{pat.ownerAddress}</span>
                         </div>
                       )}
                     </div>
@@ -337,7 +435,7 @@ export default function CalendarView() {
                 {/* Veterinario */}
                 {appt.vet && (
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="w-9 h-9 rounded-lg bg-surface-sunken flex items-center justify-center text-ink-500">
+                    <div className="w-9 h-9 rounded-lg bg-surface-sunken flex items-center justify-center text-ink-500 flex-shrink-0">
                       <FileText size={18} />
                     </div>
                     <div>

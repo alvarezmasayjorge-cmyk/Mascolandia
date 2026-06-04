@@ -99,7 +99,7 @@ export default function Settings() {
 
         {showNewUser && (
           <form onSubmit={handleCreateUser} className="bg-surface-sunken p-4 rounded-lg space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <input required type="text" placeholder="Nombre" className="border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
               <input required type="email" placeholder="Email" className="border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} />
               <select className="border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
