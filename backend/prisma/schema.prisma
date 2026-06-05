@@ -11,7 +11,7 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("ASISTENTE")
+  role      String   @default("RECEPCIONISTA")
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

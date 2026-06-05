@@ -52,7 +52,12 @@ function SidebarContent({ user, navItems, onClose, onLogout }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-ink-900 truncate">{user?.name}</p>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-brand-50 text-brand-600 font-semibold uppercase">{user?.role}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase ${
+              user?.role === 'ADMIN' ? 'bg-brand-50 text-brand-600' :
+              user?.role === 'RECEPCIONISTA' ? 'bg-blue-50 text-blue-600' :
+              user?.role === 'CAJERA' ? 'bg-emerald-50 text-emerald-600' :
+              'bg-gray-100 text-ink-500'
+            }`}>{user?.role}</span>
           </div>
         </div>
         <button
@@ -84,8 +89,9 @@ export default function Layout() {
     { to: '/agenda', icon: Calendar, label: 'Agenda' },
   ];
 
+  navItems.push({ to: '/caja', icon: DollarSign, label: 'Caja' });
+
   if (user?.role === 'ADMIN') {
-    navItems.push({ to: '/caja', icon: DollarSign, label: 'Caja' });
     navItems.push({ to: '/configuracion', icon: Settings, label: 'Configuracion' });
   }
 
@@ -95,7 +101,7 @@ export default function Layout() {
     <div className="flex h-screen bg-surface font-sans">
 
       {/* Sidebar desktop — siempre visible en md+ */}
-      <div className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col justify-between print:hidden flex-shrink-0">
+      <div className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col justify-between print:hidden print-hide flex-shrink-0">
         <SidebarContent
           user={user}
           navItems={navItems}
@@ -107,12 +113,12 @@ export default function Layout() {
       {/* Drawer móvil — overlay + panel deslizante */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 md:hidden print-hide"
           onClick={closeSidebar}
         />
       )}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 flex flex-col justify-between z-50 transition-transform duration-300 md:hidden print:hidden ${
+        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 flex flex-col justify-between z-50 transition-transform duration-300 md:hidden print:hidden print-hide ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -136,7 +142,7 @@ export default function Layout() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Topbar móvil */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 print:hidden flex-shrink-0">
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 print:hidden print-hide flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 text-ink-500 hover:bg-surface-sunken rounded-lg"

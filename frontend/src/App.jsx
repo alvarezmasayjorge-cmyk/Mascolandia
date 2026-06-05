@@ -29,7 +29,7 @@ function App() {
             <Route path="pacientes/*" element={<Patients />} />
             <Route path="inventario" element={<Inventory />} />
             <Route path="agenda" element={<CalendarView />} />
-            <Route path="caja" element={<ProtectedRoute requireAdmin><CashFlow /></ProtectedRoute>} />
+            <Route path="caja" element={<CashFlow />} />
             <Route path="configuracion" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
           </Route>
         </Routes>

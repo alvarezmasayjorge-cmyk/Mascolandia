@@ -3,10 +3,13 @@ import { Search, Plus, X, Package, ArrowUpCircle, ArrowDownCircle, Pencil, Trash
 import { format, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const EMPTY_FORM = { name: '', category: 'Medicamento', stock: '', unit: 'Unidad', expiryDate: '', costPrice: '', sellingPrice: '', supplier: '', notes: '' };
 
 export default function Inventory() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -225,10 +228,12 @@ export default function Inventory() {
                         className="text-ink-400 hover:text-brand-600 transition-colors" title="Editar producto">
                         <Pencil size={16} />
                       </button>
-                      <button onClick={() => handleDelete(item)}
-                        className="text-ink-400 hover:text-danger-500 transition-colors" title="Eliminar producto">
-                        <Trash2 size={16} />
-                      </button>
+                      {isAdmin && (
+                        <button onClick={() => handleDelete(item)}
+                          className="text-ink-400 hover:text-danger-500 transition-colors" title="Eliminar producto">
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const validate = require('../middlewares/validate');
-const { authenticate } = require('../middlewares/auth');
+const { authenticate, requireAdmin } = require('../middlewares/auth');
 const { createInventoryItemSchema, updateInventoryItemSchema, inventoryMovementSchema } = require('../validators/inventory.schema');
 const inventoryService = require('../services/inventory.service');
 const { ok, created } = require('../utils/response');
@@ -30,7 +30,7 @@ router.put('/:id', authenticate, validate({ params: idParams, body: updateInvent
   } catch (err) { next(err); }
 });
 
-router.delete('/:id', authenticate, validate({ params: idParams }), async (req, res, next) => {
+router.delete('/:id', authenticate, requireAdmin, validate({ params: idParams }), async (req, res, next) => {
   try {
     await inventoryService.remove(req.params.id);
     ok(res, { message: 'Producto eliminado' });

@@ -64,7 +64,7 @@ export default function PatientDetail() {
     setTimeout(() => {
       window.print();
       setPrintConsultation(null);
-    }, 150);
+    }, 350);
   };
 
   if (!patient) return <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div></div>;
@@ -80,13 +80,13 @@ export default function PatientDetail() {
 
       {/* Área de impresión de ficha — solo visible al imprimir */}
       {printConsultation && (
-        <div className="hidden print:block">
+        <div className="hidden print:block print-area">
           <PrintConsultationCard patient={patient} consultation={printConsultation} />
         </div>
       )}
 
       {/* Contenido normal — se oculta al imprimir una ficha específica */}
-    <div className={`space-y-6 ${printConsultation ? 'print:hidden' : 'print:max-w-full'}`}>
+    <div className={`space-y-6 ${printConsultation ? 'print:hidden print-hide' : 'print:max-w-full'}`}>
       <div className="flex justify-between items-center print:hidden">
         <button onClick={() => navigate(-1)} className="text-ink-500 hover:text-ink-900 flex items-center gap-2">
           <ArrowLeft size={20} /> <span>Volver</span>

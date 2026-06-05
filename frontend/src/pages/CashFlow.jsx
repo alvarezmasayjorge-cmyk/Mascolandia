@@ -3,10 +3,13 @@ import { Search, ArrowDown, ArrowUp, Plus, X, DollarSign, Pencil, Trash2 } from 
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const EMPTY_FORM = { type: 'INGRESO', category: 'Consulta', description: '', amount: '' };
 
 export default function CashFlow() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const [transactions, setTransactions] = useState([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -142,12 +145,16 @@ export default function CashFlow() {
                 </td>
                 <td className="p-3 md:p-4">
                   <div className="flex gap-2 justify-end">
-                    <button onClick={() => openEdit(tx)} className="text-ink-400 hover:text-brand-600 transition-colors" title="Editar transacción">
-                      <Pencil size={16} />
-                    </button>
-                    <button onClick={() => handleDelete(tx)} className="text-ink-400 hover:text-danger-500 transition-colors" title="Eliminar transacción">
-                      <Trash2 size={16} />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button onClick={() => openEdit(tx)} className="text-ink-400 hover:text-brand-600 transition-colors" title="Editar transacción">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(tx)} className="text-ink-400 hover:text-danger-500 transition-colors" title="Eliminar transacción">
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

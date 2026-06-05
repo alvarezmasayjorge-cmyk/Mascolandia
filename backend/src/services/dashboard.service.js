@@ -18,17 +18,14 @@ async function getDashboard(user) {
     include: { patient: true, vet: { select: { name: true } } },
   });
 
-  let cashFlow = null;
-  if (user.role === 'ADMIN') {
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const txs = await prisma.cashTransaction.findMany({
-      where: { date: { gte: firstDayOfMonth } },
-    });
-    cashFlow = {
-      income: txs.filter(t => t.type === 'INGRESO').reduce((acc, t) => acc + t.amount, 0),
-      expense: txs.filter(t => t.type === 'EGRESO').reduce((acc, t) => acc + t.amount, 0),
-    };
-  }
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const txs = await prisma.cashTransaction.findMany({
+    where: { date: { gte: firstDayOfMonth } },
+  });
+  const cashFlow = {
+    income: txs.filter(t => t.type === 'INGRESO').reduce((acc, t) => acc + t.amount, 0),
+    expense: txs.filter(t => t.type === 'EGRESO').reduce((acc, t) => acc + t.amount, 0),
+  };
 
   return { appointmentsToday, recentConsultations, cashFlow };
 }

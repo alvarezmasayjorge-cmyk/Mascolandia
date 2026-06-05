@@ -9,7 +9,7 @@ export default function Settings() {
   const [clinicData, setClinicData] = useState({ name: '', address: '', phone: '', email: '' });
   const [users, setUsers] = useState([]);
   const [showNewUser, setShowNewUser] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'ASISTENTE' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'RECEPCIONISTA' });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function Settings() {
       const created = res.data.data;
       toast.success(`Usuario creado. Contrasenia temporal: ${created.tempPassword}`, { duration: 15000 });
       setShowNewUser(false);
-      setNewUser({ name: '', email: '', role: 'ASISTENTE' });
+      setNewUser({ name: '', email: '', role: 'RECEPCIONISTA' });
       api.get('/users').then(res => setUsers(res.data.data || []));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error al crear usuario');
@@ -103,7 +103,8 @@ export default function Settings() {
               <input required type="text" placeholder="Nombre" className="border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
               <input required type="email" placeholder="Email" className="border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} />
               <select className="border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
-                <option value="ASISTENTE">Asistente</option>
+                <option value="RECEPCIONISTA">Recepcionista</option>
+                <option value="CAJERA">Cajera</option>
                 <option value="ADMIN">Admin</option>
               </select>
             </div>
@@ -124,7 +125,12 @@ export default function Settings() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-0.5 rounded font-semibold ${u.role === 'ADMIN' ? 'bg-brand-50 text-brand-600' : 'bg-gray-100 text-ink-500'}`}>
+                <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                  u.role === 'ADMIN' ? 'bg-brand-50 text-brand-600' :
+                  u.role === 'RECEPCIONISTA' ? 'bg-blue-50 text-blue-600' :
+                  u.role === 'CAJERA' ? 'bg-emerald-50 text-emerald-600' :
+                  'bg-gray-100 text-ink-500'
+                }`}>
                   {u.role}
                 </span>
                 {u.id !== currentUser?.id && (

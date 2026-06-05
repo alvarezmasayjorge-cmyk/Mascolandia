@@ -20,6 +20,45 @@ async function main() {
     console.log('Admin ya existe.');
   }
 
+  // Recepcionista user
+  const existingRecep = await prisma.user.findUnique({ where: { email: 'recepcion@mascolandia.com' } });
+  if (!existingRecep) {
+    const hashedPassword = await bcrypt.hash('recepcion123', 10);
+    await prisma.user.create({
+      data: {
+        email: 'recepcion@mascolandia.com',
+        password: hashedPassword,
+        name: 'Recepcionista Mascolandia',
+        role: 'RECEPCIONISTA',
+      },
+    });
+    console.log('Recepcionista creada: recepcion@mascolandia.com / recepcion123');
+  }
+
+  // Cajera user
+  const existingCajera = await prisma.user.findUnique({ where: { email: 'cajera@mascolandia.com' } });
+  if (!existingCajera) {
+    const hashedPassword = await bcrypt.hash('cajera123', 10);
+    await prisma.user.create({
+      data: {
+        email: 'cajera@mascolandia.com',
+        password: hashedPassword,
+        name: 'Cajera Mascolandia',
+        role: 'CAJERA',
+      },
+    });
+    console.log('Cajera creada: cajera@mascolandia.com / cajera123');
+  }
+
+  // Migrar usuarios ASISTENTE existentes a RECEPCIONISTA
+  const migrated = await prisma.user.updateMany({
+    where: { role: 'ASISTENTE' },
+    data: { role: 'RECEPCIONISTA' },
+  });
+  if (migrated.count > 0) {
+    console.log(`${migrated.count} usuario(s) ASISTENTE migrado(s) a RECEPCIONISTA`);
+  }
+
   // Inicializar contadores
   const counters = ['patient', 'consultation'];
   for (const name of counters) {

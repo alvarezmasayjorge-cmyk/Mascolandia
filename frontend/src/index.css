@@ -167,5 +167,16 @@ body {
 /* Print */
 @media print {
   @page { margin: 5mm 8mm; size: letter; }
-  body { background: white; }
+  body { background: white !important; }
+
+  nav, header, aside,
+  .print-hide { display: none !important; }
+
+  .print-area {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
 }

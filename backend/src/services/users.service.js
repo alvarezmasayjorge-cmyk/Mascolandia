@@ -18,7 +18,7 @@ async function create({ email, name, role }) {
   const hashed = await bcrypt.hash(tempPassword, 10);
 
   const user = await prisma.user.create({
-    data: { email, name, role: role || 'ASISTENTE', password: hashed },
+    data: { email, name, role: role || 'RECEPCIONISTA', password: hashed },
     select: { id: true, email: true, name: true, role: true },
   });
 
