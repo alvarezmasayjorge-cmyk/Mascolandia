@@ -143,7 +143,7 @@ export default function Inventory() {
         </div>
         <div>
           <label className="block text-sm text-ink-700 mb-1 font-medium">{editItem ? 'Stock actual' : 'Stock inicial'}</label>
-          <input required type="number" step="0.1" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
+          <input required type="number" step="1" min="0" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
           {editItem && <p className="text-xs text-ink-400 mt-1">Para corregir el stock directamente edita este valor.</p>}
         </div>
         <div>
@@ -275,7 +275,7 @@ export default function Inventory() {
             <form onSubmit={handleMovement} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm text-ink-700 mb-1 font-medium">Cantidad ({movementModal.unit})</label>
-                <input required type="number" step="0.1" min="0.1" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900"
+                <input required type="number" step="1" min="1" className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-ink-900"
                   value={movementData.quantity} onChange={e => setMovementData({...movementData, quantity: e.target.value})} />
                 <p className="text-xs text-ink-400 mt-1">Stock actual: {movementModal.stock} {movementModal.unit}</p>
               </div>

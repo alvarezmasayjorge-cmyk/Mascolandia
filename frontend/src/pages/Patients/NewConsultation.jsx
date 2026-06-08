@@ -221,14 +221,14 @@ export default function NewConsultation() {
                         className="w-20 border border-gray-200 rounded p-1.5 text-sm outline-none text-ink-900"
                       />
                       <span className="text-sm text-ink-500">{item.unit}</span>
-                      {item.sellingPrice && <span className="text-sm text-ink-300">(${(item.sellingPrice * item.quantity).toFixed(0)})</span>}
+                      {item.sellingPrice && <span className="text-sm text-ink-300">(Bs. {(item.sellingPrice * item.quantity).toFixed(0)})</span>}
                       <button type="button" onClick={() => handleRemoveItem(item.id)} className="text-danger-500 text-sm hover:underline ml-2">Quitar</button>
                     </div>
                   </div>
                 ))}
                 {totalMedicamentos > 0 && (
                   <div className="text-right pt-2 border-t border-gray-200 text-sm text-ink-500">
-                    Subtotal medicamentos: <strong className="text-ink-900">${totalMedicamentos.toFixed(0)}</strong>
+                    Subtotal medicamentos: <strong className="text-ink-900">Bs. {totalMedicamentos.toFixed(0)}</strong>
                   </div>
                 )}
               </div>
@@ -236,7 +236,7 @@ export default function NewConsultation() {
 
             <div className="pt-4 border-t border-gray-100">
               <label className="block text-sm font-medium text-ink-700 mb-1">
-                Costo total de la consulta ($) <span className="text-xs text-ink-300 font-normal">(Ingresa a caja)</span>
+                Costo total de la consulta (Bs.) <span className="text-xs text-ink-300 font-normal">(Ingresa a caja)</span>
               </label>
               <input type="number" name="cost" className="w-full sm:w-1/3 border border-gray-200 rounded-lg p-2.5 outline-none focus:border-brand-500 text-xl font-bold text-ink-900" value={formData.cost} onChange={handleChange} />
             </div>
